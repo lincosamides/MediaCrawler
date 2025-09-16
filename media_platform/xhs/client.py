@@ -10,18 +10,16 @@
 
 import asyncio
 import json
-import re
 from typing import Any, Callable, Dict, List, Optional, Union
 from urllib.parse import urlencode
 
 import httpx
 from playwright.async_api import BrowserContext, Page
-from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 import config
 from base.base_crawler import AbstractApiClient
 from tools import utils
-from html import unescape
 
 from .exception import DataFetchError, IPBlockError
 from .field import SearchNoteType, SearchSortType
@@ -507,7 +505,14 @@ class XiaoHongShuClient(AbstractApiClient):
         result = []
         notes_has_more = True
         notes_cursor = ""
-        while notes_has_more and len(result) < config.CRAWLER_MAX_NOTES_COUNT:
+        while notes_has_more:
+            if config.CRAWLER_MAX_NOTES_COUNT >= 0:
+                utils.logger.info(
+                    f"[XiaoHongShuClient.get_all_notes_by_creator] Getting notes for user {user_id}, current count: {len(result)}/{config.CRAWLER_MAX_NOTES_COUNT}"
+                )
+                if len(result) >= config.CRAWLER_MAX_NOTES_COUNT:
+                    break
+
             notes_res = await self.get_notes_by_creator(user_id, notes_cursor)
             if not notes_res:
                 utils.logger.error(
@@ -528,9 +533,12 @@ class XiaoHongShuClient(AbstractApiClient):
                 f"[XiaoHongShuClient.get_all_notes_by_creator] got user_id:{user_id} notes len : {len(notes)}"
             )
 
-            remaining = config.CRAWLER_MAX_NOTES_COUNT - len(result)
-            if remaining <= 0:
-                break
+            if config.CRAWLER_MAX_NOTES_COUNT >= 0:
+                remaining = config.CRAWLER_MAX_NOTES_COUNT - len(result)
+                if remaining <= 0:
+                    break
+            else:
+                remaining = len(notes)
 
             notes_to_add = notes[:remaining]
             if callback:

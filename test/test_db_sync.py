@@ -12,7 +12,7 @@ from sqlalchemy.schema import MetaData
 # 将项目根目录添加到 sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from config.db_config import mysql_db_config, sqlite_db_config
+from config.db_config import mysql_db_config, SQLITE_DB_PATH
 from database.models import Base
 
 def get_mysql_engine():
@@ -22,7 +22,8 @@ def get_mysql_engine():
 
 def get_sqlite_engine():
     """创建并返回一个SQLite数据库引擎"""
-    conn_str = f"sqlite:///{sqlite_db_config['db_path']}"
+    SQLITE_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn_str = f"sqlite:///{SQLITE_DB_PATH.absolute()}"
     return create_engine(conn_str)
 
 def get_db_schema(engine):
