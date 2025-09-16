@@ -23,6 +23,6 @@ XHS_SPECIFIED_NOTE_URL_LIST = [
 
 # 指定用户ID列表
 XHS_CREATOR_ID_LIST = [
-    "63e36c9a000000002703502b",
+    "593772c66a6a69655182df72",
     # ........................
 ]
