@@ -10,6 +10,7 @@
 
 
 import os
+from pathlib import Path
 
 # mysql config
 MYSQL_DB_PWD = os.getenv("MYSQL_DB_PWD", "123456")
@@ -38,8 +39,4 @@ CACHE_TYPE_REDIS = "redis"
 CACHE_TYPE_MEMORY = "memory"
 
 # sqlite config
-SQLITE_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "database", "sqlite_tables.db")
-
-sqlite_db_config = {
-    "db_path": SQLITE_DB_PATH
-}
+SQLITE_DB_PATH = Path(__file__).resolve().parent.parent / "data" / "sqlite" / "sqlite.db"

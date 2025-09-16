@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from contextlib import asynccontextmanager
 from .models import Base
 import config
-from config.db_config import mysql_db_config, sqlite_db_config
+from config.db_config import mysql_db_config, SQLITE_DB_PATH
 
 # Keep a cache of engines
 _engines = {}
@@ -31,7 +31,8 @@ def get_async_engine(db_type: str = None):
         return None
 
     if db_type == "sqlite":
-        db_url = f"sqlite+aiosqlite:///{sqlite_db_config['db_path']}"
+        SQLITE_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+        db_url = f"sqlite+aiosqlite:///{SQLITE_DB_PATH.absolute()}"
     elif db_type == "mysql" or db_type == "db":
         db_url = f"mysql+asyncmy://{mysql_db_config['user']}:{mysql_db_config['password']}@{mysql_db_config['host']}:{mysql_db_config['port']}/{mysql_db_config['db_name']}"
     else:
