@@ -356,7 +356,7 @@ class XiaoHongShuClient(AbstractApiClient):
         result = []
         comments_has_more = True
         comments_cursor = ""
-        while comments_has_more and len(result) < max_count:
+        while comments_has_more and (len(result) < max_count if max_count > 0 else True):
             comments_res = await self.get_note_comments(
                 note_id=note_id, xsec_token=xsec_token, cursor=comments_cursor
             )
@@ -506,7 +506,7 @@ class XiaoHongShuClient(AbstractApiClient):
         notes_has_more = True
         notes_cursor = ""
         while notes_has_more:
-            if config.CRAWLER_MAX_NOTES_COUNT >= 0:
+            if config.CRAWLER_MAX_NOTES_COUNT > 0:
                 utils.logger.info(
                     f"[XiaoHongShuClient.get_all_notes_by_creator] Getting notes for user {user_id}, current count: {len(result)}/{config.CRAWLER_MAX_NOTES_COUNT}"
                 )
@@ -533,7 +533,7 @@ class XiaoHongShuClient(AbstractApiClient):
                 f"[XiaoHongShuClient.get_all_notes_by_creator] got user_id:{user_id} notes len : {len(notes)}"
             )
 
-            if config.CRAWLER_MAX_NOTES_COUNT >= 0:
+            if config.CRAWLER_MAX_NOTES_COUNT > 0:
                 remaining = config.CRAWLER_MAX_NOTES_COUNT - len(result)
                 if remaining <= 0:
                     break

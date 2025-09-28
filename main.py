@@ -10,7 +10,6 @@
 
 
 import asyncio
-import sys
 from typing import Optional
 
 import cmd_arg
@@ -24,6 +23,8 @@ from media_platform.tieba import TieBaCrawler
 from media_platform.weibo import WeiboCrawler
 from media_platform.xhs import XiaoHongShuCrawler
 from media_platform.zhihu import ZhihuCrawler
+
+
 
 
 class CrawlerFactory:
