@@ -10,6 +10,7 @@
 
 import asyncio
 import json
+import random
 from typing import Any, Callable, Dict, List, Optional, Union
 from urllib.parse import urlencode
 
@@ -20,6 +21,7 @@ from tenacity import retry, stop_after_attempt, wait_fixed
 import config
 from base.base_crawler import AbstractApiClient
 from tools import utils
+from store import xhs as xhs_store
 
 from .exception import DataFetchError, IPBlockError
 from .field import SearchNoteType, SearchSortType
@@ -356,7 +358,7 @@ class XiaoHongShuClient(AbstractApiClient):
         result = []
         comments_has_more = True
         comments_cursor = ""
-        while comments_has_more and (len(result) < max_count if max_count > 0 else True):
+        while comments_has_more and ((len(result) < max_count) if max_count > 0 else True):
             comments_res = await self.get_note_comments(
                 note_id=note_id, xsec_token=xsec_token, cursor=comments_cursor
             )
@@ -541,11 +543,19 @@ class XiaoHongShuClient(AbstractApiClient):
                 remaining = len(notes)
 
             notes_to_add = notes[:remaining]
-            if callback:
-                await callback(notes_to_add)
+            notes_to_process = []
+            for note_to_add in notes_to_add:
+                note_id = note_to_add.get("note_id")
+                note_exists = await xhs_store.note_exists(note_id)
+                if not note_exists:
+                    notes_to_process.append(note_to_add)
+                else:
+                    utils.logger.info(f"[XiaoHongShuClient.get_all_notes_by_creator] note_id: {note_id} exists, skip")
 
-            result.extend(notes_to_add)
-            await asyncio.sleep(crawl_interval)
+            if callback:
+                await callback(notes_to_process)
+            result.extend(notes_to_process)
+            await asyncio.sleep(random.randrange(1, crawl_interval))
 
         utils.logger.info(
             f"[XiaoHongShuClient.get_all_notes_by_creator] Finished getting notes for user {user_id}, total: {len(result)}"

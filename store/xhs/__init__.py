@@ -16,6 +16,7 @@ from typing import List
 
 import config
 from var import source_keyword_var
+from database.db_session import get_session
 
 from .xhs_store_media import *
 from ._store_impl import *
@@ -110,6 +111,30 @@ async def update_xhs_note(note_item: Dict):
     }
     utils.logger.info(f"[store.xhs.update_xhs_note] xhs note: {local_db_item}")
     await XhsStoreFactory.create_store().store_content(local_db_item)
+
+async def note_exists(note_id: str) -> bool:
+    """
+    判断小红书笔记是否存在
+    Args:
+        note_id:
+
+    Returns:
+
+    """
+    async with get_session() as session:
+        return await XhsStoreFactory.create_store().content_is_exist(session, note_id)
+
+async def comment_exists(comment_id: str) -> bool:
+    """
+    判断小红书笔记评论是否存在
+    Args:
+        comment_id:
+
+    Returns:
+
+    """
+    async with get_session() as session:
+        return await XhsStoreFactory.create_store().comment_is_exist(session, comment_id)
 
 
 async def batch_update_xhs_note_comments(note_id: str, comments: List[Dict]):
